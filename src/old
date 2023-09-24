@@ -11,12 +11,19 @@ const App: React.FC = () => {
   const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
 
   //   Get the taskify added to lcoalStorage using useEffect
-  //   useEffect(() => {
-  //     const storedTodos = localStorage.getItem("TodoList");
-  //     if (storedTodos) {
-  //       setTodos(JSON.parse(storedTodos));
-  //     }
-  //   }, []);
+  useEffect(() => {
+    const storedTodos = localStorage.getItem("TodoList");
+    if (storedTodos) {
+      //   setTodos(JSON.parse(storedTodos));
+      const parsedTodos = JSON.parse(storedTodos);
+      // Separate active and completed tasks
+      const activeTodos = parsedTodos.filter((todo: Todo) => !todo.isDone);
+      const completedTodos = parsedTodos.filter((todo: Todo) => todo.isDone);
+
+      setTodos(activeTodos);
+      setCompletedTodos(completedTodos);
+    }
+  }, []);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +36,7 @@ const App: React.FC = () => {
       setTodo(""); // setTodo input field back to empty array
 
       // Save the updated todos to localStorage
-      //   localStorage.setItem("TodoList", JSON.stringify([...todos, newTodo]));
+      localStorage.setItem("TodoList", JSON.stringify([...todos, newTodo]));
     }
   };
 
@@ -83,6 +90,9 @@ const App: React.FC = () => {
     setCompletedTodos(complete);
     // and setTodos gonna have active or as active
     setTodos(active);
+
+    // Update the localStorage with the new state active to complete
+    localStorage.setItem("TodoList", JSON.stringify([...active, ...complete]));
   };
 
   return (

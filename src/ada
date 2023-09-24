@@ -1,0 +1,114 @@
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import { Todo } from "./Model";
+import InputField from "./component/InputField";
+import TodoList from "./component/TodoList";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
+
+const App: React.FC = () => {
+  const [todo, setTodo] = useState<string>(""); 
+  const [todos, setTodos] = useState<Todo[]>([]); 
+  const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
+
+  
+  useEffect(() => {
+    const storedTodos = localStorage.getItem("TodoList");
+    if (storedTodos) {
+      
+      const parsedTodos = JSON.parse(storedTodos);
+      
+      const activeTodos = parsedTodos.filter((todo: Todo) => !todo.isDone);
+      const completedTodos = parsedTodos.filter((todo: Todo) => todo.isDone);
+
+      setTodos(activeTodos);
+      setCompletedTodos(completedTodos);
+    }
+  }, []);
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (todo) {
+      
+      
+      
+      const newTodo = { id: Date.now(), todo, isDone: false }; task we  want to add
+      setTodos([...todos, newTodo]); todos means all data add a newTodo
+      setTodo(""); 
+
+      
+      localStorage.setItem("TodoList", JSON.stringify([...todos, newTodo]));
+    }
+  };
+
+  
+  const onDragEnd = (result: DropResult) => {
+    
+    
+    fields first for destination and other for sources= sources is something where it came from, for Example it came from since it was from index[0] then destination where we drop it ot it will go to index 1  which is the completed Task
+
+    
+    const { source, destination } = result;
+    if (!destination) {
+      
+      return; 
+    }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      
+      return; 
+    }
+
+    
+    let add,
+      active = todos, directly manupulate it? Again when we manipulated our active variable, we are going to provide it to setTodos state so that will be more neat way to do this.
+      complete = completedTodos;
+
+    
+    if (source.droppableId === "TodosList") {
+      
+      add = active[source.index]; source.index of it
+
+      TodosList or source.droppableId
+      active.splice(source.index, 1); necessary, inserts new elements in their place, returning the deleted elements. and 1 from this is remove 1 tem
+    } else {
+      
+      add = complete[source.index];
+      complete.splice(source.index, 1); 
+    }
+
+    
+    if (destination.droppableId === "TodosList") {
+      
+      active.splice(destination.index, 0, add); destination,index , then 0 to not remove then add means add it
+    } else {
+      complete.splice(destination.index, 0, add);
+    }
+
+    setCompletedTodods(complete) that gonna have complete
+    setCompletedTodos(complete);
+    
+    setTodos(active);
+
+    
+    localStorage.setItem("TodoList", JSON.stringify([...active, ...complete]));
+  };
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="App">
+        <span className="heading">TASKIFY</span>
+        <InputField todo={todo} setTodo={setTodo} handleAdd={handleAdd} />
+        <TodoList
+          todos={todos}
+          setTodos={setTodos}
+          completedTodos={completedTodos}
+          setCompletedTodos={setCompletedTodos}
+        />
+      </div>
+    </DragDropContext>
+  );
+};
+
+export default App;
